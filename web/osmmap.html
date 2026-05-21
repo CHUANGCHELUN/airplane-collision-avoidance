@@ -1,0 +1,523 @@
+<!-- API 位址：預設 localhost:8081，若伺服器在其他 IP 請修改下方的 fetch() 網址 -->
+<html lang="zh-tw">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+    <title>地圖</title>
+    <style type="text/css" media="screen">
+     
+    
+    #map{
+        position: absolute;
+        top: 0%;
+        left: 0%;
+        height: 100%;
+        width: 100vw;
+    }
+    
+    table{
+        border:1px solid;
+        margin: auto;
+        width:350px ;
+        table-layout:fixed;
+    }
+   
+    table th{
+        position: relative;
+        width: 30%;
+        background-color: #7d7d7d;
+        color: rgb(218, 216, 216);
+        text-align: center;
+        padding: 10px 0;
+    }
+    table td{
+        text-align: left;
+        width: 70%;
+        text-align: center;
+        background-color: #eee;
+        padding: 10px 0;
+    }
+    
+    caption
+    {
+        
+        text-align: center;
+        
+        color: #444444;
+    }
+    
+
+
+
+/*側邊欄選擇器*/
+.sidenav {
+    height: 100%;
+    width: 0; /*原始寬度*/
+    position: fixed;
+    /*z-index、top、left共同控制側欄的懸浮（上方1，下方-1）*/
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #d4cdcd;
+    overflow-x: hidden;
+    transition: 0.5s; /*側欄延遲0.5s顯示*/
+    padding-top: 60px;
+}
+.first
+     {height:50px; overflow:hidden;
+      width:200px; 
+     }
+.first:hover {height:auto}
+
+/*側邊欄標籤選擇器*/
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #444444;
+    display: block;
+    transition: 0.3s; /*標籤延遲0.3s顯示*/
+}
+ 
+.sidenav p {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 20px;
+    color: #444444;
+    display: block;
+    transition: 0.3s; 
+ /*標籤延遲0.3s顯示*/
+}
+
+/*側欄標籤和關閉按鈕光標的效果*/
+.sidenav a:hover, .offcanvas a:focus{
+    color: #1b1b1b;
+}
+
+/*側欄和關閉按鈕的位置選擇器*/
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+/*主體內容*/
+#main {
+    transition: margin-left .5s;/*主體內容延遲0.5s整體y右移動*/
+    padding: 16px;
+}
+
+/*當文檔高度小於450px時，改變側欄的padding屬性和字體大小*/
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+
+</style>
+</head>
+
+<body>
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        
+        <div class=first><a href="#">機場</a>
+        <ul>   
+                <a href="#"id="tsa">松山機場</a>            
+                <a href="#"id="rmq">台中機場</a>
+                <a href="#"id="tpe">桃園機場</a>
+                <a href="#"id="ut">羽田機場</a>
+        </ul>
+        </div>
+        <p  href="#"id="time"></p>
+        <p  href="#"id="time1"></p>
+        <table id="table1">
+            <caption>飛機資訊</caption>
+            <tr>
+                <th >班機</th>
+                <th >時速(kmh)</th>
+                <th >GPS.lat</th>
+                <th >GPS.lng</th>                
+            </tr>
+            
+        </table>
+        <table id="table">
+          
+        </table>
+        <table id="table2">
+            <tr>
+                <th >航向</th>
+                <th >航高(ft)</th>
+            </tr>
+        </table>
+        <table id="table">
+          
+        </table>
+        <table id="table3">
+            <tr>
+                <th >排程出發時間</th>
+                <th >排程抵達時間</th>
+            </tr>
+        </table>
+        <table id="table">
+          
+        </table>
+
+        
+    </div>
+    
+    <div id="map"><span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span></div>
+    <script type="text/javascript">
+        /*打開側欄，修改側欄寬度，主體左跨度、背景透明度*/
+            function openNav() {
+                document.getElementById("mySidenav").style.width = "350px";
+            document.getElementById("map").style.marginLeft = "350px";
+                document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+            }
+            /*關閉側欄，恢復原始側欄寬度，主體左跨度、背景透明度*/
+            function closeNav() {
+            document.getElementById("mySidenav").style.width = "0";
+            document.getElementById("map").style.marginLeft= "0";
+            document.body.style.backgroundColor = "white";
+            }
+    </script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <script>
+         // 啟動時間更新
+    
+    let tran={};
+    var currentMarker={}; // 儲存當前的標記
+    var circle1={},circle2={},circle3={},table={};
+    var pathCoordinates={};
+    var pathCoordinates1={};
+    var flightPaths0 = {};
+    var flightPaths1 = {};
+    var pathgps;
+    var i = 0;
+    var onclickflight ='';
+    let map,maplng=35.55434549791139,maplnt=139.7705127308972;
+    let center;
+    var fgps={};
+    var higher={};
+    const tsa_element = document.querySelector('#tsa');
+    tsa_element.addEventListener('click', function() {
+      
+        const ipCoordinates1 = [25.069722,121.5525];
+
+        map.setView(ipCoordinates1, 18);
+    })//當物件被點擊時，回傳IP位置
+    const rmq_element= document.querySelector('#rmq');
+    rmq_element.addEventListener('click', function() {
+      
+      const ipCoordinates2 = [24.263880,120.625068];
+
+      map.setView(ipCoordinates2, 18);
+    })//當物件被點擊時，回傳IP位置
+    const tpe_element= document.querySelector('#tpe');
+    tpe_element.addEventListener('click', function() {
+      
+      const ipCoordinates3 = [25.077137,121.231899];
+
+      map.setView(ipCoordinates3, 18);
+    })//當物件被點擊時，回傳IP位置
+    const ut_element= document.querySelector('#ut');
+    ut_element.addEventListener('click', function() {
+      
+      const ipCoordinates4 = [35.552222,139.779722];
+
+      map.setView(ipCoordinates4, 18);
+    })//當物件被點擊時，回傳IP位置
+    
+    var isInfoVisible = false;
+    var ips=false;
+    function initMap() {
+        pathCoordinates = {};
+        center = [maplng, maplnt]; // 中心點座標
+        map = L.map('map').setView(center, 18);
+        
+        L.control.scale({maxWidth:50}).addTo(map);
+            
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+	    maxZoom: 18,
+        opacity: 0.6,
+	    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OpenStreetMap France</a>'
+        }).addTo(map);
+        
+        
+    }
+   
+
+    initMap();
+    setInterval(marker,500);
+    marker();
+    function marker() {
+        // 使用 Fetch API 讀取 "output.json" 文件i
+        
+        fetch('http://localhost:8081/get_hbase_data')
+            .then(response => response.json()) // 解析 JSON 數據
+            .then(data => {
+                
+                // 將 JSON 數據轉換成格式化的字符串並插入容器中
+                for (let v=0;v<=i;v++) {
+                    
+                    if(currentMarker[v]){
+                        map.removeLayer(currentMarker[v]);
+                        
+                    }
+                    
+                    if(circle1[v])
+                    {
+                        map.removeLayer(circle1[v]);
+                        
+                    }
+                    if(circle2[v])
+                    {
+                        
+                        map.removeLayer(circle2[v]);
+                        
+                    }
+                    if(circle3[v])
+                    {
+                       
+                        map.removeLayer(circle3[v]);
+                    }
+                    
+                }
+                
+                i=0;
+
+               
+                
+                for (var value in data) {
+                    //console.log(value)
+                    document.getElementById("time1").innerHTML = data[value]["ver"];
+                    document.getElementById("time").innerHTML = Date();
+                    var name = data[value]["name"];
+                    var lat =data[value]["lat"];
+                    var lng = data[value]["lng"];
+                    var speed = data[value]["speed"];
+                    var wcname =data[value]["wcname"];
+             
+                    i++                    
+                    let Url='photo/blue/'+data[value]["degrees"].toFixed(0)+'.png';
+                    if (data[value]["ah"] >= 1)
+                        Url='photo/yellow/'+data[value]["degrees"].toFixed(0)+'.png';
+                                  
+                    
+                    // 在地圖上標記點
+                    let c = [data[value]["lat"], data[value]["lng"]];                    
+                    let customIcon = L.icon({
+                        iconUrl: Url,
+                        iconSize: [100, 100],
+                        
+                    })
+
+                    currentMarker[i] = L.marker(c, {
+                        icon: customIcon,
+                        title: data[value]["name"], // 跟 <a> 的 title 一樣
+                        opacity: 1.0
+                    }).addTo(map);
+
+                    
+                    
+                    if(!pathCoordinates[name])
+                    {
+                        pathCoordinates[name] = {
+                        coordinates:[]
+                    }};
+                    if(!pathCoordinates1[name])
+                    {
+                        pathCoordinates1[name] = {
+                        coordinates:[]
+                    }};
+
+                    pathgps=[data[value]["lat"],data[value]["lng"]];
+                    
+                    if(data[value]["ah"] == 0)
+                    {    if (!pathCoordinates[name].coordinates.some(coord => coord[0] === pathgps[0] && coord[1] === pathgps[1])) {
+                        // 如果 pathgps 不在 pathCoordinates[name].coordinates 中，就將其添加
+                        pathCoordinates[name].coordinates.push(pathgps);
+                        fgps[name]=pathgps;
+                        higher[name]=true;
+                        }
+                        
+                    }
+                    else
+                    {   
+                        
+                        if (!pathCoordinates1[name].coordinates.some(coord => coord[0] === pathgps[0] && coord[1] === pathgps[1])) {
+                        // 如果 pathgps 不在 pathCoordinates[name].coordinates 中，就將其添加
+                        if(higher[name]){
+                            pathCoordinates1[name].coordinates.push(fgps[name]);
+                            higher[name]=false;
+                        }
+                        pathCoordinates1[name].coordinates.push(pathgps);
+                        }
+                    }
+                    //document.getElementById("time").innerHTML = JSON.stringify(pathCoordinates["TG-683"].coordinates);
+
+                    
+                    var color;
+                
+                    currentMarker[i].addEventListener('click', function (e){
+                        var x = e.target.options.title;
+                         
+                        if (isInfoVisible) {
+                            onclickflight='';
+                            map.removeLayer(flightPaths0);
+                            map.removeLayer(flightPaths1);
+                            clearInfoTable();
+                            var table2 = document.getElementsByTagName("table")[5];
+                            table2.innerHTML = ''; 
+                            isInfoVisible = false;
+                        } else {
+                            
+                            onclickflight=x;
+                            //flight_api(x);
+                            isInfoVisible = true;
+                           
+                        }
+                           
+                            
+                    });
+                    
+                    
+                   
+                    if(onclickflight !='') {
+                        if(onclickflight == name) {
+                        clearInfoTable();
+                        
+                        var table = document.getElementsByTagName("table")[1];
+                        var table1 = document.getElementsByTagName("table")[3];
+                        
+                        var newRow1 = table1.insertRow();
+                        var cell5 = newRow1.insertCell(0);
+                        var cell6 = newRow1.insertCell(1);
+                        
+                        var newRow = table.insertRow();
+                        var cell1 = newRow.insertCell(0);
+                        var cell2 = newRow.insertCell(1);
+                        var cell3 = newRow.insertCell(2);
+                        var cell4 = newRow.insertCell(3);
+                        cell1.innerHTML = value;
+                        cell2.innerHTML = data[value].speed.toFixed(6);
+                        cell3.innerHTML = data[value].lat.toFixed(6);
+                        cell4.innerHTML = data[value].lng.toFixed(6);
+                        cell5.innerHTML = data[value].degrees;
+                        cell6.innerHTML = data[value].ah;
+                        map.removeLayer(flightPaths0);
+                        map.removeLayer(flightPaths1);
+                        flightPaths0 = L.polyline(pathCoordinates[name].coordinates, {
+                                color: '#FFFFFF', // 路徑的颜色
+                                weight: 8,      // 路徑的線寬
+                                opacity: 1.0,    // 路徑的不透明度
+                                
+                        }).addTo(map);
+                        flightPaths1 = L.polyline(pathCoordinates1[name].coordinates, {
+                                color: '#FFBF00', // 路徑的颜色
+                                weight: 8,      // 路徑的線寬
+                                opacity: 0.7,    // 路徑的不透明度
+                                
+                        }).addTo(map);
+                        }
+
+                    }
+                    function flight_api(aircraftNumber) {
+                        
+                        fetch('http://localhost:8081/get_api_data/' + aircraftNumber)
+                            .then(response => response.json())
+                            .then(data => {
+                                // 顯示從api.php返回的结果
+                                var table2 = document.getElementsByTagName("table")[5];
+                                
+
+                                var newRow3 = table2.insertRow();
+                                var cell7 = newRow3.insertCell(0);
+                                var cell8 = newRow3.insertCell(1);
+                                cell7.innerHTML = data.flights[0].scheduled_out;
+                                cell8.innerHTML = data.flights[0].scheduled_on;
+
+                                
+                            })
+                            .catch(error => {
+                                console.error('获取信息时出错：', error);
+                            });
+                    }
+                    function clearInfoTable() {
+                        var table = document.getElementsByTagName("table")[1];
+                        table.innerHTML = ''; 
+                        var table1 = document.getElementsByTagName("table")[3];
+                        table1.innerHTML = ''; 
+                        
+
+                    }
+                    if(data[value]["wcoler"]=="G"){
+                        
+                        circle3[i] = L.circle(c, {
+                            color: '#3CB371',
+                            fill:false,
+                            radius: 417//T=60
+                        }).addTo(map);
+                        circle3[i].setStyle({ fill: true,fillColor: '#3CB371',fillOpacity: 0.1 });
+                        
+                    }
+                    
+                    else if(data[value]["wcoler"]=="Y")
+                    {   
+                        circle2[i] = L.circle(c, {
+                            color: '#FFBF00',
+                            fill:false,
+                            radius: 250//T=35
+                        }).addTo(map);
+                        circle2[i].setStyle({ fill: true,fillColor: '#FFBF00',fillOpacity: 0.2  });
+                    }
+                    else if(data[value]["wcoler"]=="R")
+                    {  
+                        circle1[i] = L.circle(c, {
+                            color:'#F08080',
+                            fill:false, 
+                            radius:138 //T=20
+                        }).addTo(map)
+                        circle1[i].setStyle({ fill: true,fillColor: '#F08080',fillOpacity: 0.2  });
+                    }
+                    
+                    let titleText = "Stop";
+                    if (data[value]["speed"] > 0) {
+                           titleText = "Taxing";
+                        if(data[value]["ah"]>0)
+                            titleText ="Flighting";
+                    }
+
+                    if(data[value]["wc"]==true)
+                    {
+                        titleText += "<br>WARNING TO HIT "+data[value]["wcname"]+" </br>";
+                        
+                    }
+                    currentMarker[i].bindTooltip("<div style='background:transparent; padding:0px 0px 0px 0px'><b>" + titleText + "</b></div>", {
+                        direction: 'bottom', // right、left、top、bottom、center。default: auto
+                        sticky: false, // true 跟著滑鼠移動。default: false
+                        permanent: false, // 是滑鼠移過才出現，還是一直出現
+                        opacity: 0.6,
+                        offset:[0,35]
+                    }).openTooltip();
+                    
+                
+                       
+
+                }
+                    
+            })
+            .catch(error => console.error('讀取 JSON 文件時出錯：', error));
+    }
+   
+</script>
+</body>
+</html>

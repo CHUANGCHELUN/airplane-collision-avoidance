@@ -1,0 +1,7 @@
+happybase
+flask
+flask-cors
+numpy
+shapely
+requests
+python-dotenv

@@ -1,0 +1,31 @@
+# 環境變數（含密鑰，絕對不能上傳）
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# 虛擬環境
+venv/
+env/
+.venv/
+
+# 影片 / 壓縮檔（太大）
+*.mov
+*.mp4
+*.rar
+*.zip
+
+# 系統檔
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
