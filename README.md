@@ -109,10 +109,8 @@ python demo/demo_haneda_v2.py
 
 ## 作者
 
-| 姓名 | 主要負責 |
-|------|---------|
-| 莊哲綸 (Che-Lun Chang) | 私有雲建置（Hadoop/HBase）、MapReduce、Python 主程式、網頁監控、LINE 警報 |
-| 邱忠憲 (Chung-Hsien Chiu) | SAT/TTC 演算法、系統整合 |
-| 詹閔勝 (Min-Sheng Chan) | ADS-B 解碼、Socket Programming 訓練 |
+- 莊哲綸 (Che-Lun Chuang)
+- 邱忠憲 (Chung-Hsien Chiu)
+- 詹閔勝 (Min-Sheng Chan)
 
 指導教授：張本杰 特聘教授（國立雲林科技大學資訊工程系）
