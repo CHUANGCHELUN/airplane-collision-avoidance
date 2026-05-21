@@ -101,6 +101,25 @@ python demo/demo_haneda_v2.py
 > **注意**：本系統核心功能需要 Hadoop + HBase 私有雲環境。
 > 若只想查看前端介面，可直接開啟 `web/osmmap.html`（無資料狀態）。
 
+## 系統截圖
+
+### 即時監控地圖 — 碰撞警報觸發（含 LINE 通知面板）
+![Web Dashboard](docs/images/web_dashboard.png)
+
+### 三圈警戒設計（綠 417m / 黃 250m / 紅 138m）
+![Warning Zones](docs/images/warning_zones.png)
+
+### LINE Notify 即時警報（手機推播）
+![LINE Notification](docs/images/line_notification.png)
+
+### SAT 碰撞偵測演算法 — 機身多邊形相交示意
+![SAT Algorithm](docs/images/sat_algorithm.png)
+
+### 雲端儲存架構（HBase + HDFS）
+![HBase Architecture](docs/images/hbase_architecture.png)
+
+---
+
 ## 研究成果
 
 - 實際前往**桃園國際機場**部署測試，確認系統可正確偵測真實 ADS-B 訊號
