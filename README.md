@@ -172,12 +172,6 @@ python demo/demo_haneda_v2.py
 
 ## 履歷描述
 
-可放在履歷專案欄位的版本：
-
-> 開發飛機地面滑行碰撞預警系統，整合 ADS-B 航機資料、HBase 分散式儲存、SAT 多邊形碰撞偵測、TTC 碰撞時間估算、OpenStreetMap 視覺化與 LINE Notify 即時警報；成功重現羽田機場擦撞事件並於碰撞前約 43 秒觸發紅色警告。
-
-條列版本：
-
 - 以 Python 建立航機滑行碰撞預測流程，整合 Haversine 距離計算、SAT 多邊形相交偵測與 TTC 時間估算。
 - 串接 HBase、Flask API 與 Leaflet/OpenStreetMap，視覺化航機位置、警戒圈與碰撞警報。
 - 整合 LINE Notify 即時警報，並以羽田機場擦撞事件與桃園機場測試情境驗證系統流程。
