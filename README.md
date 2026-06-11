@@ -20,31 +20,40 @@
 
 ### 即時監控地圖與 LINE 警報
 
-![Web Dashboard](docs/images/web_dashboard.png)
+<p align="center">
+    <img src ="docs/images/web_dashboard.png",alt ="即時監控地圖與 LINE 警報", width="90%">
+</p>
 
 系統在 OpenStreetMap 上顯示航機位置、警戒圈與碰撞警報，右側為 LINE Notify 推播示意。
 
 ### 三圈警戒區設計
 
-![Warning Zones](docs/images/warning_zones.png)
+<p align="center">
+  <img src="docs/images/warning_zones.png" alt="三圈警戒區設計" width="90%">
+</p>
 
 系統以距離建立綠、黃、紅三層警戒區，並搭配 SAT 與 TTC 判斷是否需要升級警報。
 
 ### LINE Notify 即時警報
 
-![LINE Notification](docs/images/line_notification.png)
+<p align="center">
+  <img src="docs/images/line_notification.png" alt="LINE Notify 即時警報" width="40%" >
+</p>
 
 當航機進入警戒範圍或預測可能碰撞時，系統會發送即時警報訊息。
 
 ### SAT 碰撞偵測示意
 
-![SAT Algorithm](docs/images/sat_algorithm.png)
-
+<p align="center">
+  <img src="docs/images/sat_algorithm.png" alt="SAT 碰撞偵測示意" width="85%">
+</p>
 航機會被轉換為帶有方向性的多邊形，系統再透過 SAT 判斷兩架航機的預測區域是否相交。
 
 ### HBase + HDFS 架構
 
-![HBase Architecture](docs/images/hbase_architecture.png)
+<p align="center">
+  <img src="docs/images/hbase_architecture.png" alt="HBase + HDFS 架構圖" width="85%">
+</p>
 
 系統使用 HBase 儲存即時航機資料與警報狀態，提供後端偵測程式與前端 API 查詢。
 
