@@ -81,12 +81,12 @@ def aircraft_corners(ac):
     cx  = ac.gps[0] + ac.length / 2 * math.cos(rad)
     cy  = ac.gps[1] + ac.length / 2 * math.sin(rad)
     corners = []
-    for sx, sy in [(−1, 1), (1, −1)]:
+    for sx, sy in [(-1, 1), (1, -1)]:
         corners.append((cx + sx * ac.span / 2 * math.sin(rad),
                          cy + sy * ac.span / 2 * math.cos(rad)))
-    cx2 = ac.gps[0] − ac.length / 2 * math.cos(rad)
-    cy2 = ac.gps[1] − ac.length / 2 * math.sin(rad)
-    for sx, sy in [(1, −1), (−1, 1)]:
+    cx2 = ac.gps[0] - ac.length / 2 * math.cos(rad)
+    cy2 = ac.gps[1] - ac.length / 2 * math.sin(rad)
+    for sx, sy in [(1, -1), (-1, 1)]:
         corners.append((cx2 + sx * ac.span / 2 * math.sin(rad),
                           cy2 + sy * ac.span / 2 * math.cos(rad)))
     return corners
@@ -199,8 +199,8 @@ def detect_collision(a1, a2):
     intersect = polygons_intersect(a1.polygon, a2.polygon)
     dist      = haversine_meters(a1, a2)
     ttc       = 0
-    if abs(a1.speed − a2.speed) > 0:
-        ttc = round(dist / abs(a1.speed * 1000 / 3600 − a2.speed * 1000 / 3600), 3)
+    if abs(a1.speed - a2.speed) > 0:
+        ttc = round(dist / abs(a1.speed * 1000 / 3600 - a2.speed * 1000 / 3600), 3)
 
     def clear_warning(ac, other_name):
         if ac.wcname == other_name:

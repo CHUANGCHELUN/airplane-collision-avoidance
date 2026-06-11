@@ -1,59 +1,113 @@
-# 以AI為基礎動態預測飛機滑行碰撞預防系統
+# 動態預測飛機滑行碰撞預防系統
 
-**Dynamic AI-based Predictive Flight Taxiing Collision Avoidance System**
+**Dynamic Predictive Flight Taxiing Collision Avoidance System**
 
-國立雲林科技大學 資訊工程系 ｜ 指導教授：張本杰 特聘教授 ｜ 2022/12 – 2023/11
+國立雲林科技大學 資訊工程系 ｜ 指導教授：張本杰 特聘教授 ｜ 2022/12 - 2023/11
 
----
+本專題建立一套機場地面滑行碰撞預警系統，整合 ADS-B 航機資料、HBase 分散式儲存、SAT 多邊形碰撞偵測、TTC 碰撞時間估算、OpenStreetMap 視覺化與 LINE Notify 即時警報。系統可針對地面滑行航機預測潛在碰撞風險，並在高風險情境下提前發出黃/紅色警告。
 
-## 系統概述
+## 專案亮點
 
-飛機在機場地面滑行時，主要依賴塔台人員指揮與機長目視，容易因疏失造成擦撞事故（如 2023/06 日本羽田機場事件）。本系統透過接收 ADS-B 訊號取得即時飛機資料，利用分散式雲端系統儲存與處理，並以演算法判斷碰撞風險，在碰撞發生前 **40～50 秒**提前發出警告。
+- 以 ADS-B 航機資料建立地面滑行狀態監控流程，支援機場場域中的航機位置、速度與航向分析。
+- 使用 HBase 儲存航機狀態與警報結果，並透過 Python 後端進行週期性碰撞風險計算。
+- 以 SAT (Separating Axis Theorem) 建立機身多邊形相交判斷，搭配 Haversine 距離與 TTC (Time-To-Collision) 估算碰撞風險。
+- 建立即時網頁監控介面，使用 Leaflet.js 與 OpenStreetMap 顯示航機位置、警戒圈與警報狀態。
+- 整合 LINE Notify，在黃/紅色警戒或預測碰撞時發送即時通知。
+- 成功重現 2023/06/10 羽田機場 TG-683 與 BR-189 擦撞事件，系統於碰撞前約 43 秒觸發紅色警告。
+- 榮獲雲科大資工系大學部專題競賽第一名。
+
+## 系統展示
+
+### 即時監控地圖與 LINE 警報
+
+![Web Dashboard](docs/images/web_dashboard.png)
+
+系統在 OpenStreetMap 上顯示航機位置、警戒圈與碰撞警報，右側為 LINE Notify 推播示意。
+
+### 三圈警戒區設計
+
+![Warning Zones](docs/images/warning_zones.png)
+
+系統以距離建立綠、黃、紅三層警戒區，並搭配 SAT 與 TTC 判斷是否需要升級警報。
+
+### LINE Notify 即時警報
+
+![LINE Notification](docs/images/line_notification.png)
+
+當航機進入警戒範圍或預測可能碰撞時，系統會發送即時警報訊息。
+
+### SAT 碰撞偵測示意
+
+![SAT Algorithm](docs/images/sat_algorithm.png)
+
+航機會被轉換為帶有方向性的多邊形，系統再透過 SAT 判斷兩架航機的預測區域是否相交。
+
+### HBase + HDFS 架構
+
+![HBase Architecture](docs/images/hbase_architecture.png)
+
+系統使用 HBase 儲存即時航機資料與警報狀態，提供後端偵測程式與前端 API 查詢。
 
 ## 系統架構
 
-```
+```text
 ADS-B 天線 (1090MHz)
     │
     ▼
-ADS-B 解碼器 ──► HBase (NoSQL) ──► MapReduce（過濾地面飛機）
-                                          │
-                                          ▼
-                               Python 主程式 (main.py)
-                               ├── SAT 演算法（機身多邊形碰撞偵測）
-                               ├── TTC 計算（碰撞時間）
-                               └── 三圈警戒（綠 834m / 黃 500m / 紅 276m）
-                                          │
-                              ┌───────────┴───────────┐
-                              ▼                       ▼
-                   OpenStreetMap 網頁監控        LINE Notify 警報
-                   (web/osmmap.html)
+ADS-B 解碼器 ──► HBase / HDFS ──► MapReduce（過濾地面航機）
+                                       │
+                                       ▼
+                           Python 碰撞偵測主程式 (core/main.py)
+                           ├── Haversine 距離計算
+                           ├── SAT 多邊形相交偵測
+                           ├── TTC 碰撞時間估算
+                           └── 綠 / 黃 / 紅警戒判斷
+                                       │
+                         ┌─────────────┴─────────────┐
+                         ▼                           ▼
+              Flask API (core/server.py)       LINE Notify 即時警報
+                         │
+                         ▼
+              Leaflet + OpenStreetMap 監控介面
+              (web/osmmap.html)
 ```
 
 ## 技術棧
 
-- **後端**：Python 3、Flask、happybase
-- **雲端**：Apache Hadoop 3 + HDFS、HBase 2、MapReduce
-- **演算法**：SAT (Separating Axis Theorem)、TTC (Time-To-Collision)、Haversine 公式
-- **前端**：Leaflet.js、OpenStreetMap
-- **通知**：LINE Notify API
-- **資料來源**：ADS-B (Automatic Dependent Surveillance-Broadcast)、FlightAware AeroAPI
+| 類別 | 技術 |
+| --- | --- |
+| 後端 | Python, Flask, happybase |
+| 資料儲存 | Apache Hadoop, HDFS, HBase |
+| 演算法 | SAT, TTC, Haversine distance |
+| 前端 | HTML, JavaScript, Leaflet.js, OpenStreetMap |
+| 通知 | LINE Notify API |
+| 資料來源 | ADS-B, FlightAware AeroAPI |
+
+## 主要實作內容
+
+- 設計飛機滑行碰撞預測流程，整合距離門檻、SAT 多邊形相交偵測與 TTC 時間估算。
+- 開發 Python 後端程式，從 HBase 讀取 ADS-B 地面航機資料並輸出警報狀態。
+- 建立 Flask API，提供航機位置、警戒狀態、距離與碰撞時間等資料給前端使用。
+- 建立 OpenStreetMap/Leaflet 前端監控畫面，視覺化航機位置、警戒圈與碰撞警報。
+- 整合 LINE Notify，在黃/紅色警戒觸發時發送即時通知。
+- 製作羽田機場與桃園機場情境 demo，用於展示系統在真實事件與測試場域中的預警流程。
 
 ## 專案結構
 
-```
+```text
 airplane-collision-avoidance/
 ├── core/
-│   ├── main.py        # 主程式：從 HBase 讀取飛機資料，進行碰撞偵測
-│   └── server.py      # Flask API：提供飛機狀態給網頁前端
+│   ├── main.py        # 從 HBase 讀取航機資料，進行碰撞偵測與警報輸出
+│   └── server.py      # Flask API，提供航機狀態給網頁前端
 ├── web/
-│   └── osmmap.html    # 網頁監控地圖（Leaflet + OpenStreetMap）
+│   └── osmmap.html    # 網頁監控地圖，使用 Leaflet + OpenStreetMap
 ├── demo/
-│   ├── demo_haneda_v1.py   # 模擬羽田事件（10架）
-│   ├── demo_haneda_v2.py   # 模擬羽田事件（19架，完整版）
-│   ├── demo_taoyuan.py     # 桃園機場實測場景
+│   ├── demo_haneda_v1.py   # 羽田事件模擬 demo
+│   ├── demo_haneda_v2.py   # 羽田事件完整模擬 demo
+│   ├── demo_taoyuan.py     # 桃園機場測試場景 demo
 │   └── README.md
 ├── docs/
+│   ├── images/        # README 展示圖片
 │   ├── 專題報告.pdf
 │   └── 專題海報.pdf
 ├── .env.example       # 環境變數範本
@@ -66,14 +120,14 @@ airplane-collision-avoidance/
 ### 前置需求
 
 - Python 3.8+
-- 運作中的 **HBase 叢集**（需要 Ubuntu 私有雲環境）
+- 運作中的 HBase 環境
 - LINE Notify Token
-- FlightAware AeroAPI 金鑰（選用，用於查詢航班資訊）
+- FlightAware AeroAPI key，選用，用於查詢航班資訊
 
 ### 安裝步驟
 
 ```bash
-git clone https://github.com/your-username/airplane-collision-avoidance.git
+git clone https://github.com/CHUANGCHELUN/airplane-collision-avoidance.git
 cd airplane-collision-avoidance
 
 pip install -r requirements.txt
@@ -83,48 +137,50 @@ cp .env.example .env
 # 編輯 .env，填入 HBASE_HOST、LINE_TOKEN 等
 ```
 
-### 執行
+### 執行方式
 
 ```bash
 # 1. 啟動碰撞偵測主程式
 python core/main.py
 
-# 2. 另開終端啟動 Flask API（供網頁前端呼叫）
+# 2. 另開終端啟動 Flask API
 python core/server.py
 
-# 3. 開啟 web/osmmap.html 查看即時監控地圖
+# 3. 開啟 web/osmmap.html 查看監控地圖
 
-# 4. （選用）執行模擬 demo
+# 4. 選用：執行模擬 demo
 python demo/demo_haneda_v2.py
 ```
 
-> **注意**：本系統核心功能需要 Hadoop + HBase 私有雲環境。
-> 若只想查看前端介面，可直接開啟 `web/osmmap.html`（無資料狀態）。
+> 注意：完整系統需要 HBase 環境。若沒有 HBase，可先透過 README 截圖、專題報告與 demo 程式了解系統流程。
 
-## 系統截圖
+## Demo 說明
 
-### 即時監控地圖 — 碰撞警報觸發（含 LINE 通知面板）
-![Web Dashboard](docs/images/web_dashboard.png)
+`demo/` 內提供不同情境的航機資料寫入腳本，可搭配 `core/main.py` 與 `core/server.py` 展示預警流程。
 
-### 三圈警戒設計（綠 417m / 黃 250m / 紅 138m）
-![Warning Zones](docs/images/warning_zones.png)
-
-### LINE Notify 即時警報（手機推播）
-![LINE Notification](docs/images/line_notification.png)
-
-### SAT 碰撞偵測演算法 — 機身多邊形相交示意
-![SAT Algorithm](docs/images/sat_algorithm.png)
-
-### 雲端儲存架構（HBase + HDFS）
-![HBase Architecture](docs/images/hbase_architecture.png)
-
----
+| 檔案 | 說明 |
+| --- | --- |
+| `demo_haneda_v1.py` | 羽田機場事件模擬，精簡版 |
+| `demo_haneda_v2.py` | 羽田機場事件模擬，完整航機情境 |
+| `demo_taoyuan.py` | 桃園機場場域測試情境 |
 
 ## 研究成果
 
-- 實際前往**桃園國際機場**部署測試，確認系統可正確偵測真實 ADS-B 訊號
-- 成功重現 **2023/06/10 羽田機場 TG-683 × BR-189 擦撞事件**，系統在碰撞前 43 秒發出紅色警告
-- 榮獲雲科大資工系大學部專題競賽**第一名**
+- 實際前往桃園國際機場部署測試，確認系統可接收並處理真實 ADS-B 訊號。
+- 成功重現 2023/06/10 羽田機場 TG-683 與 BR-189 擦撞事件，系統於碰撞前約 43 秒觸發紅色警告。
+- 榮獲雲科大資工系大學部專題競賽第一名。
+
+## 履歷描述
+
+可放在履歷專案欄位的版本：
+
+> 開發飛機地面滑行碰撞預警系統，整合 ADS-B 航機資料、HBase 分散式儲存、SAT 多邊形碰撞偵測、TTC 碰撞時間估算、OpenStreetMap 視覺化與 LINE Notify 即時警報；成功重現羽田機場擦撞事件並於碰撞前約 43 秒觸發紅色警告。
+
+條列版本：
+
+- 以 Python 建立航機滑行碰撞預測流程，整合 Haversine 距離計算、SAT 多邊形相交偵測與 TTC 時間估算。
+- 串接 HBase、Flask API 與 Leaflet/OpenStreetMap，視覺化航機位置、警戒圈與碰撞警報。
+- 整合 LINE Notify 即時警報，並以羽田機場擦撞事件與桃園機場測試情境驗證系統流程。
 
 ## 作者
 
